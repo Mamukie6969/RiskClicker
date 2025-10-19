@@ -1,7 +1,8 @@
 let score = 0;
 let resetChance = 1;
-
+const clickSound = new Audio('clickSound.mp4');
 function handleClick() {
+    clickSound.play();
     if (Math.random() * 100 < resetChance) {
         score = 0;
         resetChance = 1;
