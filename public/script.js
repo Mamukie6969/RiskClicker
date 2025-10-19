@@ -35,6 +35,11 @@ function submitScore() {
 
                 alert('score submitted');
 
+                score = 0;
+                resetChance = 1;
+                document.getElementById('score').textContent = score;
+                document.getElementById('chance').textContent = resetChance;
+
             } else {
 
                 alert('submission failed');
