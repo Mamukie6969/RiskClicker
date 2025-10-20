@@ -24,27 +24,27 @@ app.post('/submit', async (req, res) => {
     try {
         const userResult = await pool.query('SELECT * FROM leaderboard WHERE name = $1', [name]);
 
+        const hashedPassword = await bcrypt.hash(password, 10);
+
         if (userResult.rows.length === 0) {
-            // If the user doesn't exist, hash the password and insert
-            const hashedPassword = await bcrypt.hash(password, 10);
-            await pool.query('INSERT INTO leaderboard (name, password) VALUES ($1, $2)', [name, hashedPassword]);
-            console.log(`New user ${name} added with hashed password.`);
+            await pool.query(
+                'INSERT INTO leaderboard (name, password, score) VALUES ($1, $2, $3)',
+                [name, hashedPassword, score]
+            );
+            console.log(` New user ${name} added with score ${score}.`);
         } else {
-            // If the user exists, check the password
             const user = userResult.rows[0];
             const isPasswordValid = await bcrypt.compare(password, user.password);
 
             if (!isPasswordValid) {
                 return res.status(401).json({ success: false, error: 'Invalid password' });
             }
-        }
 
-        // Insert or update the score without hashing the password again
-        await pool.query(
-            'INSERT INTO leaderboard (name, score) VALUES ($1, $2) ' +
-            'ON CONFLICT (name) DO UPDATE SET score = $2',
-            [name, score]
-        );
+            await pool.query(
+                'UPDATE leaderboard SET score = $1 WHERE name = $2',
+                [score, name]
+            );
+        }
 
         res.json({ success: true });
 
@@ -53,6 +53,7 @@ app.post('/submit', async (req, res) => {
         res.status(500).json({ success: false, error: 'Something went wrong' });
     }
 });
+
 
 app.get('/leaderboard', async (req, res) => {
     try {
@@ -65,5 +66,5 @@ app.get('/leaderboard', async (req, res) => {
 });
 
 app.listen(PORT, () => {
-    console.log(`Server running at http://localhost:${PORT}`);
+    console.log(`Server running at ${PORT}`);
 });
