@@ -20,12 +20,13 @@ function handleClick() {
 function submitScore() {
 
     const name = document.getElementById('nameInput').value.trim();
-    if (!name) return alert('please enter name');
+    const password = document.getElementById('passwordInput').value.trim();
+    if (!name || !password) return alert('please provide name as well the password');
 
     fetch('/submit', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ name, score })
+        body: JSON.stringify({ name, password, score })
 
     })
         .then(res => res.json())
